@@ -11,110 +11,147 @@ import SwiftUI
 struct AddReflectionView: View {
   @Environment(\.modelContext) private var modelContext
   @Environment(\.dismiss) private var dismiss
+  @StateObject private var addReflectionViewModel: AddReflectionViewModel = AddReflectionViewModel()
   @AppStorage("fontSize") private var fontSize = 16.0
-  
-  @State private var title = ""
-  @State private var content = ""
-  @State private var selectedCategory = ReflectionCategory.personal
-  @State private var tags: [String] = []
-  @State private var tagInput = ""
   
   var body: some View {
     NavigationStack {
       Form {
-        Section("기본 정보") {
-          TextField("제목", text: $title)
-            .font(.headline)
-          
-          Picker("카테고리", selection: $selectedCategory) {
-            ForEach(ReflectionCategory.allCases, id: \.self) { category in
-              HStack {
-                Image(systemName: category.icon)
-                  .foregroundColor(Color(category.color))
-                Text(category.rawValue)
-              }
-              .tag(category)
-            }
-          }
-        }
+        BasicInfoSectionView(addReflectionViewModel: addReflectionViewModel)
         
-        Section("내용") {
-          TextField("회고 내용을 작성해주세요", text: $content, axis: .vertical)
-            .lineLimit(5...15)
-        }
+        ContentSectionView(content: $addReflectionViewModel.content)
         
-        Section("태그") {
-          HStack {
-            TextField("태그 입력", text: $tagInput)
-            Button("추가") {
-              addTag()
-            }
-            .disabled(tagInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-          }
-          
-          if !tags.isEmpty {
-            LazyVGrid(columns: [
-              GridItem(.adaptive(minimum: 80))
-            ], alignment: .leading, spacing: 8) {
-              ForEach(Array(tags.enumerated()), id: \.offset) { index, tag in
-                HStack {
-                  Text("#\(tag)")
-                  Button(action: { removeTag(at: index) }) {
-                    Image(systemName: "xmark.circle.fill")
-                      .foregroundColor(.secondary)
-                  }
-                }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.secondary.opacity(0.2))
-                .cornerRadius(8)
-              }
-            }
-          }
-        }
+        TagsSectionView(addReflectionViewModel: addReflectionViewModel)
       }
       .navigationTitle("새 회고")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
-        ToolbarItem(placement: .navigationBarLeading) {
-          Button("취소") {
+        CustomNavigationBar.standard(
+          onCancel: {
             dismiss()
-          }
-        }
-        
-        ToolbarItem(placement: .navigationBarTrailing) {
-          Button("저장") {
-            saveReflection()
-          }
-          .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-                    content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-        }
+          },
+          onSave: {
+            addReflectionViewModel.saveReflection(dismiss: dismiss)
+          },
+          isSaveDisabled: (
+            addReflectionViewModel.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+            addReflectionViewModel.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+          )
+        )
       }
     }
     .font(.system(size: fontSize))
   }
+}
+
+// MARK: - 기본 정보 섹션 뷰
+private struct BasicInfoSectionView: View {
+  @ObservedObject private var addReflectionViewModel: AddReflectionViewModel
   
-  private func addTag() {
-    let trimmedTag = tagInput.trimmingCharacters(in: .whitespacesAndNewlines)
-    if !trimmedTag.isEmpty && !tags.contains(trimmedTag) {
-      tags.append(trimmedTag)
-      tagInput = ""
+  fileprivate init(addReflectionViewModel: AddReflectionViewModel) {
+    self.addReflectionViewModel = addReflectionViewModel
+  }
+  
+  fileprivate var body: some View {
+    Section("기본 정보") {
+      TitleFieldView(title: $addReflectionViewModel.title)
+      CategoryPickerView(selectedCategory: $addReflectionViewModel.selectedCategory)
     }
   }
+}
+
+// MARK: - 제목 필드 뷰
+private struct TitleFieldView: View {
+  @Binding var title: String
   
-  private func removeTag(at index: Int) {
-    tags.remove(at: index)
+  fileprivate var body: some View {
+    TextField("제목", text: $title)
+      .font(.headline)
+  }
+}
+
+// MARK: - 카테고리 선택 뷰
+private struct CategoryPickerView: View {
+  @Binding var selectedCategory: ReflectionCategory
+  
+  fileprivate var body: some View {
+    Picker("카테고리", selection: $selectedCategory) {
+      ForEach(ReflectionCategory.allCases, id: \.self) { category in
+        HStack {
+          Image(systemName: category.icon)
+            .foregroundColor(Color(category.color))
+          Text(category.rawValue)
+        }
+        .tag(category)
+      }
+    }
+  }
+}
+
+// MARK: - 컨텐츠 섹션 뷰
+private struct ContentSectionView: View {
+  @Binding var content: String
+  
+  fileprivate var body: some View {
+    Section("내용") {
+      TextField(
+        "회고 내용을 작성해주세요",
+        text: $content,
+        axis: .vertical
+      )
+      .lineLimit(5...15)
+    }
+  }
+}
+
+// MARK: - 태그 섹션 뷰
+private struct TagsSectionView: View {
+  @ObservedObject private var addReflectionViewModel: AddReflectionViewModel
+  
+  fileprivate init(addReflectionViewModel: AddReflectionViewModel) {
+    self.addReflectionViewModel = addReflectionViewModel
   }
   
-  private func saveReflection() {
-    let reflection = Reflection(
-      title: title.trimmingCharacters(in: .whitespacesAndNewlines),
-      content: content.trimmingCharacters(in: .whitespacesAndNewlines),
-      category: selectedCategory,
-      tags: tags
-    )
-    modelContext.insert(reflection)
-    dismiss()
+  fileprivate var body: some View {
+    Section("태그") {
+      HStack {
+        TextField(
+          "태그 입력",
+          text: $addReflectionViewModel.tagInput
+        )
+        
+        Button("추가") {
+          withAnimation(.easeInOut(duration: 0.3)) {
+            addReflectionViewModel.addTag()
+          }
+        }
+        .disabled(addReflectionViewModel.isTagInputEmpty)
+      }
+    }
+    
+    if !addReflectionViewModel.tags.isEmpty {
+      ForEach(addReflectionViewModel.tags.indices, id: \.self) { index in
+        if index < addReflectionViewModel.tags.count {
+          HStack {
+            Text("#\(addReflectionViewModel.tags[index])")
+
+            Button(
+              action: {
+                addReflectionViewModel.removeTagAt(index)
+              },
+              label: {
+                Image(systemName: "xmark.circle.fill")
+                  .foregroundColor(.secondary)
+              }
+            )
+          }
+          .padding(.horizontal, 8)
+          .padding(.vertical, 4)
+          .background(Color.secondary.opacity(0.2))
+          .cornerRadius(8)
+        }
+      }
+    }
   }
 }
 

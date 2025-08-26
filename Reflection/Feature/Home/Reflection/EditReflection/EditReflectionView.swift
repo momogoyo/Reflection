@@ -28,21 +28,18 @@ struct EditReflectionView: View {
       .navigationTitle("회고 편집")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
-        ToolbarItem(placement: .navigationBarLeading) {
-          Button("취소") {
+        CustomNavigationBar.standard(
+          onCancel: {
             dismiss()
-          }
-        }
-        
-        ToolbarItem(placement: .navigationBarTrailing) {
-          Button("저장") {
+          },
+          onSave: {
             editReflectionViewModel.updateReflection(reflection, dismiss: dismiss)
-          }
-          .disabled(
+          },
+          isSaveDisabled: (
             editReflectionViewModel.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
             editReflectionViewModel.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
           )
-        }
+        )
       }
     }
     .font(.system(size: fontSize))
@@ -96,7 +93,7 @@ private struct CategoryPickerView: View {
   }
 }
 
-// MARK - 컨텐츠 섹션 뷰
+// MARK: - 컨텐츠 섹션 뷰
 private struct ContentSectionView: View {
   @Binding var content: String
   
@@ -112,6 +109,7 @@ private struct ContentSectionView: View {
   }
 }
 
+// MARK: - 태그 섹션 뷰
 private struct TagsSectionView: View {
   @ObservedObject private var editReflectionViewModel: EditReflectionViewModel
   
@@ -122,28 +120,29 @@ private struct TagsSectionView: View {
   fileprivate var body: some View {
     Section("태그") {
       HStack {
-        TextField("태그 입력", text: $editReflectionViewModel.tagInput)
-        Button("추가") {
-          editReflectionViewModel.addTag()
-        }
-        .disabled(
-          editReflectionViewModel.tagInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        TextField(
+          "태그 입력",
+          text: $editReflectionViewModel.tagInput
         )
+        
+        Button("추가") {
+          withAnimation(.easeInOut(duration: 0.3)) {
+            editReflectionViewModel.addTag()
+          }
+        }
+        .disabled(editReflectionViewModel.isTagInputEmpty)
       }
     }
     
     if !editReflectionViewModel.tags.isEmpty {
-      LazyVGrid(
-        columns: [GridItem(.adaptive(minimum: 80))],
-        alignment: .leading,
-        spacing: 8
-      ) {
-        ForEach(Array(editReflectionViewModel.tags.enumerated()), id: \.offset) { index, tag in
+      ForEach(editReflectionViewModel.tags.indices, id: \.self) { index in
+        if index < editReflectionViewModel.tags.count {
           HStack {
-            Text("#\(tag)")
+            Text("#\(editReflectionViewModel.tags[index])")
+            
             Button(
               action: {
-                editReflectionViewModel.removeTag(at: index)
+                editReflectionViewModel.removeTagAt(index)
               },
               label: {
                 Image(systemName: "xmark.circle.fill")
@@ -158,13 +157,6 @@ private struct TagsSectionView: View {
         }
       }
     }
-  }
-}
-
-// MARK: - 툴바 아이템 뷰
-private struct ToolBarItemsView: View {
-  fileprivate var body: some View {
-    
   }
 }
 

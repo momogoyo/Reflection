@@ -30,12 +30,12 @@ struct ContentView: View {
         .tag(0)
       
       // 통계 탭
-      StatisticsView()
-        .tabItem {
-          Image(systemName: "chart.bar.fill")
-          Text("통계")
-        }
-        .tag(1)
+//      StatisticsView()
+//        .tabItem {
+//          Image(systemName: "chart.bar.fill")
+//          Text("통계")
+//        }
+//        .tag(1)
       
       // 설정 탭
       SettingsView()

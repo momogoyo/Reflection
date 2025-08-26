@@ -218,7 +218,7 @@ private struct ContentSectionView: View {
       title: "SwiftUI 학습 회고",
       content: "오늘은 SwiftUI의 MVVM 패턴에 대해 학습했다. 처음에는 복잡해 보였지만, 코드를 분리하고 나니 훨씬 이해하기 쉬워졌다.",
       category: .learning,
-      tags: ["iOS", "SwiftUI", "개발일지", "학습", "프로젝트", "회고", "앱개발", "코딩", "공부", "성장"]
+      tags: [ "iOS", "SwiftUI", "개발일지", "학습", "프로젝트", "회고", "앱개발", "코딩", "공부", "성장"]
     )
   )
 }

@@ -23,7 +23,7 @@ struct ReflectionListView: View {
     NavigationStack {
       VStack(spacing: 0) {
         CategoryFilterSectionView(reflectionListViewModel: reflectionListViewModel)
-        .padding(.vertical, 8)
+          .padding(.vertical, 8)
         
         ReflectionListSectionView(
           reflections: filteredReflections,
@@ -40,16 +40,11 @@ struct ReflectionListView: View {
       }
       .navigationTitle("회고 저장소")
       .toolbar {
-        ToolbarItem(placement: .navigationBarTrailing) {
-          Button(
-            action: {
-              reflectionListViewModel.showingAddReflection = true
-            },
-            label: {
-              Image(systemName: "plus")
-            }
-          )
-        }
+        CustomNavigationBar.addOnly(
+          onAdd: {
+            reflectionListViewModel.showingAddReflection = true
+          }
+        )
       }
       .sheet(isPresented: $reflectionListViewModel.showingAddReflection) {
         AddReflectionView()
@@ -177,8 +172,8 @@ struct ReflectionRowView: View {
           reflection.createdAt,
           style: .date
         )
-          .font(.caption)
-          .foregroundColor(.secondary)
+        .font(.caption)
+        .foregroundColor(.secondary)
       }
       
       Text(reflection.content)

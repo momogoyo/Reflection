@@ -18,6 +18,11 @@ class EditReflectionViewModel: ObservableObject {
   
   private var modelContext: ModelContext?
   
+  var isTagInputEmpty: Bool {
+    let tag = self.tagInput
+    return tag.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty
+  }
+  
   init(
     title: String  = "",
     content: String = "",
@@ -54,13 +59,16 @@ extension EditReflectionViewModel {
   
   func addTag() {
     let trimmedTag = tagInput.trimmingCharacters(in: .whitespacesAndNewlines)
-    if !trimmedTag.isEmpty && !tags.contains(trimmedTag) {
+    
+    if !trimmedTag.isEmpty && !tags.contains(where: { $0 == trimmedTag }) {
       tags.append(trimmedTag)
       tagInput = ""
     }
   }
   
-  func removeTag(at index: Int) {
+  func removeTagAt(_ index: Int) {
+    guard index >= 0 && index < self.tags.count else { return }
+    
     tags.remove(at: index)
   }
   

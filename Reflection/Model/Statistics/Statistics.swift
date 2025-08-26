@@ -8,16 +8,29 @@
 import Foundation
 import SwiftData
 
-// MARK: - 통계 데이터 모델
-struct ReflectionStatistics {
+// MARK: - 회고 통계 데이터 모델
+// 사용자의 회고 작성 패턴 등을 분석하기 위한 데이터 포함
+struct Statistics {
+  // 전체 회고 개수
   let totalCount: Int
-  let categoryStats: [ReflectionCategory: Int]
-  let weeklyStats: [Date: Int]
-  let monthlyStats: [Date: Int]
-  let topTags: [(tag: String, count: Int)]
+  
+  // 카테고리별 통계 배열로 저장
+  // [personal: 20, work: 15, health: 5 ...]
+  let categoryStats: [CategoryStatistics]
+  
+  // 주별 통계 배열 (최근 8주)
+  // 각 주마다 몇 개의 회고를 작성했는지
+  // [이번주: 3, 지난주: 2 ...]
+  let weeklyStats: [DateStatistics]
+  
+  // 월별 통계 배열 (최근 6개월)
+  // 각 월마다 몇 개의 회고를 작성했는지
+  // [8월: 12, 7월: 8, 6월: 15]
+  let monthlyStats: [DateStatistics]
+  let topTags: [TagStatistics]
   let recentReflections: [Reflection]
   
-  static func calculate(from reflections: [Reflection]) -> ReflectionStatistics {
+  static func calculate(from reflections: [Reflection]) -> Statistics {
     let calendar = Calendar.current
     let now = Date()
     
@@ -63,7 +76,7 @@ struct ReflectionStatistics {
       .prefix(5)
       .map { $0 }
     
-    return ReflectionStatistics(
+    return Statistics(
       totalCount: reflections.count,
       categoryStats: categoryStats,
       weeklyStats: weeklyStats,
