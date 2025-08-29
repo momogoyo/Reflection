@@ -28,7 +28,12 @@ struct DateStatistics {
 // 카테고리별 회고 통계 타입
 // - category: 회고 카테고리
 // - count: 해당 카테고리의 회고 개수
-struct CategoryStatistics {
+struct CategoryStatistics: Hashable {
   let category: ReflectionCategory
   let count: Int
+  
+  func percentage(of total: Int) -> Double {
+    return total > 0 ? Double(count) / Double(total) : 0.0
+  }
 }
+

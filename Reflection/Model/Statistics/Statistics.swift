@@ -18,7 +18,7 @@ struct Statistics {
   // [personal: 20, work: 15, health: 5, ...]
   let categoryStats: [CategoryStatistics]
   
-  // 주별 통계 배열 (최근 8주)
+  // 주별 통계 배열 (최근 7주)
   // 각 주마다 몇 개의 회고를 작성했는지
   // [이번주: 3, 지난주: 2, ...]
   let weeklyStats: [DateStatistics]
@@ -61,8 +61,8 @@ struct Statistics {
     // 주별 통계
     var weeklyStats: [DateStatistics] = []
     
-    // 8주 전부터 오늘까지 반복
-    for weekOffset in 0..<8 {
+    // 7주 전부터 오늘까지 반복
+    for weekOffset in 0..<7 {
       guard let targetDate = calendar.date(byAdding: .weekOfYear, value: -weekOffset, to: now),
             let weekInterval = calendar.dateInterval(of: .weekOfYear, for: targetDate) else { continue }
       
