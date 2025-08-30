@@ -8,11 +8,11 @@
 import Foundation
 
 extension Date {
-  var dateFormatter: DateFormatter {
+  var formatted: String {
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "ko_KR")
     formatter.dateFormat = "yyyy.MM.dd" // , a h:mm
     
-    return formatter
+    return formatter.string(from: self)
   }
 }

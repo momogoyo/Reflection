@@ -83,12 +83,12 @@ private struct ReflectionHeaderView: View {
         .fixedSize(horizontal: false, vertical: true)
       
       HStack {
-        Text("• 작성일: \(reflection.createdAt, formatter: dateFormatter)")
+        Text("작성일: \(reflection.createdAt.formatted)")
           .font(.caption)
           .foregroundColor(.secondary)
         
         if reflection.createdAt != reflection.updatedAt {
-          Text("• 수정일: \(reflection.updatedAt, formatter: dateFormatter)")
+          Text("• 수정일: \(reflection.updatedAt.formatted)")
             .font(.caption)
             .foregroundColor(.secondary)
         }
